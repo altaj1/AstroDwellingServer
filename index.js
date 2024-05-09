@@ -52,11 +52,18 @@ async function run() {
     })
 
      // Save a services data in db
-     app.post('/job', async (req, res) => {
+     app.post('/services', async (req, res) => {
       const jobData = req.body
-      const result = await jobsCollection.insertOne(jobData)
+      const result = await homeService.insertOne(jobData)
       res.send(result)
+      console.log(result)
     })
+    // clere cookis
+    app.post('/logout', async (req, res) => {
+      const user = req.body;
+      console.log('logging out', user);
+      res.clearCookie('token', { maxAge: 0 }).send({ success: true })
+  })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
