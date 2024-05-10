@@ -1,5 +1,5 @@
 const express = require('express')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors')
 const jwt = require('jsonwebtoken')
 const cookieParser = require('cookie-parser')
@@ -81,6 +81,28 @@ async function run() {
      console.log(result)
      res.send(result)
   })
+  app.get('/view-detail/:id', async(req, res)=>{
+    // console.log(req.params.id)
+    const id = req.params.id;
+    const query = {_id: new ObjectId(id)}
+    const result = await homeService.findOne(query)
+    // console.log(result);
+    res.send(result)
+
+  })
+  app.put('/booking/:id', async(req, res)=>{
+    const id = req.params.id
+      const status = req.body
+      const query = { _id: new ObjectId(id)}
+      const updateDoc = {
+        $set: status,
+        
+      }
+      const options = {upsert:true};
+      const result = await homeService.updateOne(query, updateDoc, options)
+      res.send(result)
+      console.log(result)
+  } )
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
