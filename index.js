@@ -65,6 +65,23 @@ async function run() {
       res.clearCookie('token', { maxAge: 0 }).send({ success: true })
   })
 
+
+  app.get('/popular-services', async (req, res)=>{
+    const result = await homeService.find().limit(6).toArray()
+   
+    res.send(result)
+
+  })
+  app.get('/all-services', async (req, res) =>{
+    const search = req.query.search;
+    let query = {
+      serviceName: { $regex: search, $options: 'i' },
+    };
+    const result = await homeService.find(query).toArray()
+     console.log(result)
+     res.send(result)
+  })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
