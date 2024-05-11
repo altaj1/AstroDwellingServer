@@ -32,6 +32,22 @@ const client = new MongoClient(uri, {
   }
 });
 
+const verifyToken = (req, res, next) =>{
+  const token = req?.cookies?.token;
+  // console.log('token in the middleware', token);
+  // no token available 
+  if(!token){
+      return res.status(401).send({message: 'unauthorized access'})
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) =>{
+      if(err){
+          return res.status(401).send({message: 'unauthorized access'})
+      }
+      req.user = decoded;
+      next();
+  })
+}
+
 async function run() {
   try {
 
@@ -90,8 +106,32 @@ async function run() {
     res.send(result)
 
   })
+  app.get('/bookings',  verifyToken, async (req, res) => {
+    // console.log(req.query.email);
+    // console.log('token owner info', req.user)
+    if(req.user.email !== req.query.email){
+        return res.status(403).send({message: 'forbidden access'})
+    }
+    let query = {};
+    if (req.query?.email) {
+        query = { "provider.email": req.query.email }
+    }
+    const result = await homeService.find(query).toArray();
+    res.send(result);
+})
+
+
+app.delete('/services-delete/:id', async (req, res) => {
+  const id = req.params.id
+  const query = { _id: new ObjectId(id) }
+  const result = await homeService.deleteOne(query)
+  res.send(result)
+})
+
+  
   app.put('/booking/:id', async(req, res)=>{
     const id = req.params.id
+    console.log(id)
       const status = req.body
       const query = { _id: new ObjectId(id)}
       const updateDoc = {
