@@ -72,7 +72,7 @@ async function run() {
       const jobData = req.body
       const result = await homeService.insertOne(jobData)
       res.send(result)
-      console.log(result)
+      // console.log(result)
     })
     // clere cookis
     app.post('/logout', async (req, res) => {
@@ -88,13 +88,30 @@ async function run() {
     res.send(result)
 
   })
+
+  app.get('/services-to-do/:email', async(req, res)=>{
+    let query ={}
+    // console.log(req.params.email)
+    if(req.params.email){
+      query = {
+        "provider.email": req.params.email,
+          status: "pending"
+      }
+    }
+    console.log(query)
+    const result = await homeService.find(query).toArray();
+    res.send(result);
+    console.log(result)
+  })
+
+
   app.get('/all-services', async (req, res) =>{
     const search = req.query.search;
     let query = {
       serviceName: { $regex: search, $options: 'i' },
     };
     const result = await homeService.find(query).toArray()
-     console.log(result)
+    //  console.log(result)
      res.send(result)
   })
   app.get('/view-detail/:id', async(req, res)=>{
@@ -106,7 +123,7 @@ async function run() {
     res.send(result)
 
   })
-  app.get('/bookings',  verifyToken, async (req, res) => {
+  app.get('/manag-services',  verifyToken, async (req, res) => {
     // console.log(req.query.email);
     // console.log('token owner info', req.user)
     if(req.user.email !== req.query.email){
@@ -116,6 +133,22 @@ async function run() {
     if (req.query?.email) {
         query = { "provider.email": req.query.email }
     }
+    
+    const result = await homeService.find(query).toArray();
+    res.send(result);
+})
+// booked services
+  app.get('/bookings',  verifyToken, async (req, res) => {
+    // console.log(req.query.email);
+    // console.log('token owner info', req.user)
+    if(req.user.email !== req.query.email){
+        return res.status(403).send({message: 'forbidden access'})
+    }
+    let query = {};
+    if (req.query?.email) {
+        query = { "buyer.userEmail": req.query.email }
+    }
+    
     const result = await homeService.find(query).toArray();
     res.send(result);
 })
@@ -131,7 +164,7 @@ app.delete('/services-delete/:id', async (req, res) => {
   
   app.put('/booking/:id', async(req, res)=>{
     const id = req.params.id
-    console.log(id)
+    // console.log(id)
       const status = req.body
       const query = { _id: new ObjectId(id)}
       const updateDoc = {
@@ -141,7 +174,7 @@ app.delete('/services-delete/:id', async (req, res) => {
       const options = {upsert:true};
       const result = await homeService.updateOne(query, updateDoc, options)
       res.send(result)
-      console.log(result)
+      // console.log(result)
   } )
 
     // Send a ping to confirm a successful connection
