@@ -98,8 +98,6 @@ async function run() {
     if(req.query.email){
       query = {
         "provider.email": req.query.email,
-        // "pending","completed", "working"
-          // status:{$in:[req.query.servicesStatus]}
           booked:'true'
       }
     }
