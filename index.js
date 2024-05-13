@@ -10,11 +10,18 @@ const corsOptions = {
     origin: [
       'http://localhost:5173',
       'http://localhost:5174',
+      'https://astro-dwelling.web.app',
+      'https://astro-dwelling.firebaseapp.com/'
       
     ],
     credentials: true,
     optionSuccessStatus: 200,
   }
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+  };
   app.use(cors(corsOptions))
   app.use(express.json())
   app.use(cookieParser())
@@ -59,11 +66,7 @@ async function run() {
         expiresIn: '365d',
       })
       res
-        .cookie('token', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-        })
+        .cookie('token', token, cookieOptions)
         .send({ success: true })
     })
 
@@ -78,7 +81,7 @@ async function run() {
     app.post('/logout', async (req, res) => {
       const user = req.body;
       console.log('logging out', user);
-      res.clearCookie('token', { maxAge: 0 }).send({ success: true })
+      res.clearCookie('token', {...cookieOptions,  maxAge: 0 }).send({ success: true })
   })
 
 
@@ -88,17 +91,19 @@ async function run() {
     res.send(result)
 
   })
-
-  app.get('/services-to-do/:email', async(req, res)=>{
+// services to do
+  app.get('/services-to-do' , async(req, res)=>{
     let query ={}
-    // console.log(req.params.email)
-    if(req.params.email){
+    // console.log(req.query.servicesStatus)
+    if(req.query.email){
       query = {
-        "provider.email": req.params.email,
-          status: "pending"
+        "provider.email": req.query.email,
+        // "pending","completed", "working"
+          // status:{$in:[req.query.servicesStatus]}
+          booked:'true'
       }
     }
-    console.log(query)
+    // console.log(query)
     const result = await homeService.find(query).toArray();
     res.send(result);
     console.log(result)
@@ -171,14 +176,35 @@ app.delete('/services-delete/:id', async (req, res) => {
         $set: status,
         
       }
+      // const options = {upsert:true};
+      const result = await homeService.updateOne(query, updateDoc)
+      res.send(result)
+      console.log(result)
+  } )
+
+
+
+  // update status
+  app.patch('/updateStatus',  async(req, res)=>{
+    const id = req.query.servicesID
+    console.log(id)
+    // .query.servicesStatus
+      const value = req.query.servicesStatus
+      const query = { _id: new ObjectId(id)}
+     
+      console.log(value)
+      const updateDoc = {
+        $set: {status: value},
+        
+      }
       const options = {upsert:true};
       const result = await homeService.updateOne(query, updateDoc, options)
       res.send(result)
-      // console.log(result)
+      console.log(result)
   } )
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
