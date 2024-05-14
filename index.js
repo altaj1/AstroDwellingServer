@@ -157,11 +157,12 @@ async function run() {
 })
 
 
-app.delete('/services-delete/:id', verifyToken, async (req, res) => {
+app.delete('/services-delete/:id',  async (req, res) => {
   const id = req.params.id
   const query = { _id: new ObjectId(id) }
   const result = await homeService.deleteOne(query)
   res.send(result)
+  console.log(result)
 })
 
   
