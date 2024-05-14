@@ -114,7 +114,7 @@ async function run() {
       serviceName: { $regex: search, $options: 'i' },
     };
     const result = await homeService.find(query).toArray()
-    //  console.log(result)
+    
      res.send(result)
   })
   app.get('/view-detail/:id', async(req, res)=>{
