@@ -104,7 +104,7 @@ async function run() {
     
     const result = await homeService.find(query).toArray();
     res.send(result);
-    // console.log(result)
+    console.log(result)
   })
 
 
