@@ -92,7 +92,7 @@ async function run() {
 
   })
 // services to do
-  app.get('/services-to-do' , async(req, res)=>{
+  app.get('/services-to-do',verifyToken, async(req, res)=>{
     let query ={}
     // console.log(req.query.servicesStatus)
     if(req.query.email){
@@ -157,7 +157,7 @@ async function run() {
 })
 
 
-app.delete('/services-delete/:id', async (req, res) => {
+app.delete('/services-delete/:id', verifyToken, async (req, res) => {
   const id = req.params.id
   const query = { _id: new ObjectId(id) }
   const result = await homeService.deleteOne(query)
