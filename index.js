@@ -75,7 +75,7 @@ async function run() {
       const jobData = req.body
       const result = await homeService.insertOne(jobData)
       res.send(result)
-      // console.log(result)
+      
     })
     // clere cookis
     app.post('/logout', async (req, res) => {
@@ -104,7 +104,7 @@ async function run() {
     
     const result = await homeService.find(query).toArray();
     res.send(result);
-    console.log(result)
+    
   })
 
 
