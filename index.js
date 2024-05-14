@@ -101,7 +101,7 @@ async function run() {
           booked:'true'
       }
     }
-    // console.log(query)
+    
     const result = await homeService.find(query).toArray();
     res.send(result);
     // console.log(result)
