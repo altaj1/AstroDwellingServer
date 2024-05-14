@@ -118,7 +118,7 @@ async function run() {
      res.send(result)
   })
   app.get('/view-detail/:id', async(req, res)=>{
-    // console.log(req.params.id)
+    
     const id = req.params.id;
     const query = {_id: new ObjectId(id)}
     const result = await homeService.findOne(query)
