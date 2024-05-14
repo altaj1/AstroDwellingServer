@@ -94,7 +94,7 @@ async function run() {
 // services to do
   app.get('/services-to-do',verifyToken, async(req, res)=>{
     let query ={}
-    // console.log(req.query.servicesStatus)
+    
     if(req.query.email){
       query = {
         "provider.email": req.query.email,
