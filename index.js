@@ -6,6 +6,8 @@ const cookieParser = require('cookie-parser')
 require('dotenv').config()
 const port = process.env.PORT || 9000
 const app = express()
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
+// console.log(stripe)
 const corsOptions = {
     origin: [
       'http://localhost:5173',
@@ -83,7 +85,23 @@ async function run() {
       console.log('logging out', user);
       res.clearCookie('token', {...cookieOptions,  maxAge: 0 }).send({ success: true })
   })
-
+  // create-payment-intent
+  app.post('/create-payment-intent', verifyToken, async (req, res)=>{
+    const price = req.body.price
+    console.log(price)
+    const priceInCent = parseFloat(price) * 100
+     if (!price || priceInCent < 1) return
+     const { client_secret } = await stripe.paymentIntents.create({
+      amount: priceInCent,
+      currency: 'usd',
+      // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+      automatic_payment_methods: {
+        enabled: true,
+      },
+    });
+     // send client secret as response
+     res.send({ clientSecret: client_secret })
+  })
 
   app.get('/popular-services', async (req, res)=>{
     const result = await homeService.find().limit(6).toArray()
@@ -166,13 +184,17 @@ app.delete('/services-delete/:id',  async (req, res) => {
 })
 
   
-  app.put('/booking/:id', async(req, res)=>{
+  app.put('/booking/:id', verifyToken, async(req, res)=>{
     const id = req.params.id
     // console.log(id)
-      const status = req.body
+      const bookingData = req.body
+      // console.log(status.status)
       const query = { _id: new ObjectId(id)}
       const updateDoc = {
-        $set: status,
+        $set: {
+          status: bookingData.status,
+          bookingInfo: bookingData
+        },
         
       }
       // const options = {upsert:true};
